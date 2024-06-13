@@ -8,6 +8,13 @@ import {
 } from 'typeorm';
 import { Article } from '../articles/article.entity';
 
+export enum Role {
+  Admin = 'admin',
+  DataAnalyst = 'dataAnalyst',
+  Moderator = 'moderator',
+  Visitor = 'visitor',
+}
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -16,12 +23,18 @@ export class User {
   @Column()
   email: string;
 
+  @Column({ type: 'varchar', length: 12 })
+  role: Role;
+
   @Column()
   @Exclude()
   password: string;
 
   @OneToMany(() => Article, (article) => article.author)
   articles: Article[];
+
+  @Column({ default: 0 })
+  warningReceived: number;
 
   @AfterInsert()
   logInsert() {

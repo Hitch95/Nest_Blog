@@ -5,7 +5,6 @@ import {
   Param,
   Post,
   Patch,
-  Query,
   Delete,
   NotFoundException,
   Session,
@@ -16,9 +15,13 @@ import { UsersService } from './users.service';
 import { AuthService } from './auth.service';
 import { UpdateUserDto } from './dtos/update-user.dto';
 // import { Serialize } from '../interceptors/serializeInterceptor';
-import { UserDto } from './dtos/user.dto';
+// import { UserDto } from './dtos/user.dto';
+import { AuthGuard } from '../guards/auth.guard';
+import { RoleGuard } from '../guards/role.guard';
+import { Roles } from './decorator/role.decorator';
 
 @Controller('auth')
+@UseGuards(AuthGuard, RoleGuard)
 // @Serialize(UserDto)
 export class UsersController {
   constructor(
@@ -49,7 +52,6 @@ export class UsersController {
 
   @Get('/:id')
   findById(@Param('id') id: string) {
-    console.log('HANDLER findById !');
     const user = this.usersService.findOne(id);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -58,24 +60,28 @@ export class UsersController {
   }
 
   @Get()
-  findUserByEmail(@Query('email') email: string) {
-    const user = this.usersService.find(email);
-    return user;
-  }
-
-  @Get()
-  findAll(@Query('all') all: boolean) {
-    const user = this.usersService.findAll();
-    return user;
+  @Roles('admin')
+  async findAll() {
+    return this.usersService.findAll();
   }
 
   @Delete('/:id')
-  removeUser(@Param('id') id: string) {
-    return this.usersService.remove(id);
+  @Roles('admin')
+  async removeUser(@Param('id') id: string) {
+    const user = await this.usersService.findOne(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 
   @Patch('/:id')
-  updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
-    return this.usersService.update(id, body);
+  @Roles('admin')
+  async updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
+    const user = this.usersService.update(id, body);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 }

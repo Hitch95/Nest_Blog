@@ -1,15 +1,22 @@
-import { Entity, Column, PrimaryGeneratedColumn, AfterInsert } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  AfterInsert,
+  ManyToOne,
+} from 'typeorm';
+import { User } from '../users/user.entity';
 
 @Entity()
 export class Article {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
-  author: string;
+  creationDate: Date;
 
-  @Column()
-  date: Date;
+  @Column({ nullable: true })
+  dateOfUpdate: Date;
 
   @Column()
   tag: string;
@@ -19,6 +26,18 @@ export class Article {
 
   @Column()
   content: string;
+
+  @Column({ default: 0 })
+  views: number;
+
+  @Column({ nullable: true })
+  comment: string;
+
+  @Column({ default: false })
+  isCommentApproved: boolean;
+
+  @ManyToOne(() => User, (user) => user.articles)
+  author: User;
 
   @AfterInsert()
   logInsert() {
