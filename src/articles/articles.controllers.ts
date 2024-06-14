@@ -7,7 +7,7 @@ import {
   UseGuards,
   Delete,
 } from '@nestjs/common';
-import { User } from 'src/users/user.entity';
+import { Role, User } from 'src/users/user.entity';
 import { Article } from './article.entity';
 import { ArticleService } from './articles.service';
 
@@ -32,7 +32,7 @@ export class ArticlesController {
   }
 
   @Post()
-  @Roles('admin')
+  @Roles(Role.Admin)
   async createArticle(
     @Body() articleData: Partial<Article>,
     @CurrentUser() user: User,
@@ -41,7 +41,7 @@ export class ArticlesController {
   }
 
   @Post(':id/comment')
-  @Roles('visitor')
+  @Roles(Role.Visitor)
   async addComment(
     @Param('id') id: string,
     @Body('comment') comment: string,
@@ -51,7 +51,7 @@ export class ArticlesController {
   }
 
   @Post(':id/approve')
-  @Roles('moderator')
+  @Roles(Role.Moderator)
   async approveComment(
     @Param('id') id: string,
     @CurrentUser() user: User,
@@ -60,7 +60,7 @@ export class ArticlesController {
   }
 
   @Delete(':id')
-  @Roles('admin')
+  @Roles(Role.Admin)
   async deleteArticle(
     @Param('id') id: string,
     @CurrentUser() user: User,

@@ -19,6 +19,7 @@ import { UpdateUserDto } from './dtos/update-user.dto';
 import { AuthGuard } from '../guards/auth.guard';
 import { RoleGuard } from '../guards/role.guard';
 import { Roles } from './decorator/role.decorator';
+import { Role } from './user.entity';
 
 @Controller('auth')
 @UseGuards(AuthGuard, RoleGuard)
@@ -34,6 +35,7 @@ export class UsersController {
     const user = await this.authService.signup(body.email, body.password);
     console.log(user);
     session.userId = user.id;
+    session.userRole = user.role;
     console.log(session);
     return user;
   }
@@ -42,16 +44,18 @@ export class UsersController {
   async signin(@Body() body: CreateUserDto, @Session() session: any) {
     const user = await this.authService.signin(body.email, body.password);
     session.userId = user.id;
+    session.userRole = user.role;
     return user;
   }
 
   @Post('/signout')
   async signout(@Session() session: any) {
     session.userId = null;
+    session.userRole = null;
   }
 
   @Get('/:id')
-  findById(@Param('id') id: string) {
+  async findById(@Param('id') id: string) {
     const user = this.usersService.findOne(id);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -60,15 +64,16 @@ export class UsersController {
   }
 
   @Get()
-  @Roles('admin')
+  @Roles(Role.Admin)
   async findAll() {
     return this.usersService.findAll();
   }
 
   @Delete('/:id')
-  @Roles('admin')
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard, RoleGuard)
   async removeUser(@Param('id') id: string) {
-    const user = await this.usersService.findOne(id);
+    const user = await this.usersService.remove(id);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -76,7 +81,8 @@ export class UsersController {
   }
 
   @Patch('/:id')
-  @Roles('admin')
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard, RoleGuard)
   async updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
     const user = this.usersService.update(id, body);
     if (!user) {

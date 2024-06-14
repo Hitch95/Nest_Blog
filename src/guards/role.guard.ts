@@ -6,7 +6,8 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
-import { User } from '../users/user.entity';
+import { Role, User } from '../users/user.entity';
+import { ROLES_KEY } from 'src/users/decorator/role.decorator';
 
 @Injectable()
 export class RoleGuard implements CanActivate {
@@ -15,15 +16,20 @@ export class RoleGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const roles = this.reflector.get<string[]>('roles', context.getHandler());
-    if (!roles) {
+    const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (!requiredRoles) {
       return true;
     }
-
-    const request = context.switchToHttp().getRequest();
-    const user: User = request.currentUser;
-    if (!user || !roles.includes(user.role)) {
-      throw new ForbiddenException('Access denied');
+    const { user } = context.switchToHttp().getRequest();
+    if (!user) {
+      throw new ForbiddenException('Access denied: user not logged in');
     }
+    if (!requiredRoles.includes(user.role)) {
+      throw new ForbiddenException('Access denied: insufficient permissions');
+    }
+    return requiredRoles.includes(user.role);
   }
 }

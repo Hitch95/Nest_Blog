@@ -7,7 +7,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(
     cookieSession({
-      keys: ['key'],
+      keys: ['Ma-N!9Wh[6?&4nDKU/G7Z39H8&K^2'],
     }),
   );
   await app.listen(process.env.PORT || 3000);
