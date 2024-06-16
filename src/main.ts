@@ -7,7 +7,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(
     cookieSession({
-      keys: ['Ma-N!9Wh[6?&4nDKU/G7Z39H8&K^2'],
+      name: 'session',
+      keys: ['key'],
+      maxAge: 1000 * 60 * 60 * 1,
     }),
   );
   await app.listen(process.env.PORT || 3000);
@@ -32,6 +34,5 @@ async function displayRoutes(app: INestApplication) {
       (item: { route: { path: string; stack: { method: string }[] } }) =>
         item !== undefined,
     );
-  console.log(availableRoutes);
 }
 bootstrap();
