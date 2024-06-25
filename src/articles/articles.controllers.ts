@@ -16,9 +16,9 @@ import { RoleGuard } from '../guards/role.guard';
 
 import { Roles } from 'src/users/decorator/role.decorator';
 import { CurrentUser } from 'src/users/decorator/current-user.decorator';
+import { CreateArticleDto } from './dtos/create-article.dto';
 
 @Controller('articles')
-@UseGuards(AuthGuard, RoleGuard)
 export class ArticlesController {
   constructor(private readonly articleService: ArticleService) {}
 
@@ -34,10 +34,10 @@ export class ArticlesController {
   @Post()
   @Roles(Role.Admin)
   async createArticle(
-    @Body() articleData: Partial<Article>,
+    @Body() createArticleDto: CreateArticleDto,
     @CurrentUser() user: User,
   ): Promise<Article> {
-    return this.articleService.createArticle(articleData, user);
+    return this.articleService.createArticle(createArticleDto, user);
   }
 
   @Post(':id/comment')

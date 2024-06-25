@@ -25,7 +25,6 @@ import { UserDto } from './dtos/user.dto';
 import { CurrentUser } from './decorator/current-user.decorator';
 
 @Controller('auth')
-@UseGuards(AuthGuard, RoleGuard)
 // @Serialize(UserDto)
 export class UsersController {
   constructor(
@@ -45,7 +44,6 @@ export class UsersController {
 
   @Post('/signin')
   async signin(@Body() body: CreateUserDto, @Session() session: any) {
-    console.log(body);
     const user = await this.authService.signin(body.email, body.password);
     console.log(user);
     session.userId = user.id;

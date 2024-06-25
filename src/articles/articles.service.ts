@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Article } from './article.entity';
 import { User } from '../users/user.entity';
+import { CreateArticleDto } from './dtos/create-article.dto';
 
 @Injectable()
 export class ArticleService {
@@ -36,14 +37,15 @@ export class ArticleService {
   }
 
   async createArticle(
-    articleData: Partial<Article>,
+    createArticleDto: CreateArticleDto,
     user: User,
   ): Promise<Article> {
+    console.log(user);
     if (user.role !== 'admin') {
       throw new ForbiddenException('Only administrators can create articles');
     }
     const article = this.articleRepository.create({
-      ...articleData,
+      ...createArticleDto,
       author: user,
     });
     return this.articleRepository.save(article);

@@ -21,7 +21,6 @@ export class CurrentUserMiddleware implements NestMiddleware {
         console.error('Middleware - Error fetching user:', error);
       }
     }
-
     next();
   }
 }

@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   AfterInsert,
   ManyToOne,
+  BeforeInsert,
 } from 'typeorm';
 import { User } from '../users/user.entity';
 
@@ -38,6 +39,11 @@ export class Article {
 
   @ManyToOne(() => User, (user) => user.articles)
   author: User;
+
+  @BeforeInsert()
+  setCreationDate() {
+    this.creationDate = new Date();
+  }
 
   @AfterInsert()
   logInsert() {
