@@ -17,7 +17,12 @@ const scrypt = promisify(_scrypt);
 export class AuthService {
   constructor(private usersService: UsersService) {}
 
-  async signup(email: string, password: string, role?: Role): Promise<User> {
+  async signup(
+    username: string,
+    email: string,
+    password: string,
+    role?: Role,
+  ): Promise<User> {
     const users = await this.usersService.find(email);
 
     if (users.length) {
@@ -32,6 +37,7 @@ export class AuthService {
     }
 
     const CreateUserDto: CreateUserDto = {
+      username,
       email,
       password: result,
       role,

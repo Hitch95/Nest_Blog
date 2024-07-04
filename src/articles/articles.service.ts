@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Article } from './article.entity';
 import { User } from '../users/user.entity';
+import { ArticleComment } from './comment/comment.entity';
 import { CreateArticleDto } from './dtos/create-article.dto';
 
 @Injectable()
@@ -14,13 +15,19 @@ export class ArticleService {
   constructor(
     @InjectRepository(Article)
     private articleRepository: Repository<Article>,
+    @InjectRepository(ArticleComment)
+    private commentRepository: Repository<ArticleComment>,
   ) {}
 
   async incrementViews(articleId: string, user: User) {
-    if (user.role !== 'visitor') {
-      throw new ForbiddenException('Only visitor can increment views');
+    if (user.role === 'visitor') {
+      const article = await this.articleRepository.findOne({
+        where: { id: articleId },
+      });
+      article.views = (article.views || 0) + 1;
+
+      await this.articleRepository.save(article);
     }
-    await this.articleRepository.increment({ id: articleId }, 'views', 1);
   }
 
   async findOne(articleId: string, user: User) {
@@ -31,9 +38,15 @@ export class ArticleService {
       throw new NotFoundException('Article not found');
     }
     if (user.role !== 'dataAnalyst') {
-      article.views = null; // Hide views for unauthorized roles
+      const { views, ...rest } = article;
+      return rest as Article;
     }
     return article;
+  }
+
+  async findAll() {
+    const articles = await this.articleRepository.find();
+    return articles;
   }
 
   async createArticle(
@@ -46,31 +59,10 @@ export class ArticleService {
     }
     const article = this.articleRepository.create({
       ...createArticleDto,
+      views: 0,
       author: user,
     });
     return this.articleRepository.save(article);
-  }
-
-  async addComment(articleId: string, comment: string, user: User) {
-    if (user.role !== 'visitor') {
-      throw new ForbiddenException('Only visitor can add comments');
-    }
-    const article = await this.findOne(articleId, user);
-    article.comment = comment;
-    article.isCommentApproved = false;
-    await this.articleRepository.save(article);
-  }
-
-  async approveComment(articleId: string, user: User) {
-    if (user.role !== 'moderator') {
-      throw new ForbiddenException('Only moderator can approve comments');
-    }
-    const article = await this.findOne(articleId, user);
-    if (!article) {
-      throw new NotFoundException('Article not found');
-    }
-    article.isCommentApproved = true;
-    await this.articleRepository.save(article);
   }
 
   async deleteArticle(articleId: string, user: User) {

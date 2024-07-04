@@ -22,7 +22,14 @@ import { CreateArticleDto } from './dtos/create-article.dto';
 export class ArticlesController {
   constructor(private readonly articleService: ArticleService) {}
 
+  @Get()
+  @UseGuards(AuthGuard, RoleGuard)
+  async getArticles(): Promise<Article[]> {
+    return this.articleService.findAll();
+  }
+
   @Get(':id')
+  @UseGuards(AuthGuard, RoleGuard)
   async getArticle(
     @Param('id') id: string,
     @CurrentUser() user: User,
@@ -38,25 +45,6 @@ export class ArticlesController {
     @CurrentUser() user: User,
   ): Promise<Article> {
     return this.articleService.createArticle(createArticleDto, user);
-  }
-
-  @Post(':id/comment')
-  @Roles(Role.Visitor)
-  async addComment(
-    @Param('id') id: string,
-    @Body('comment') comment: string,
-    @CurrentUser() user: User,
-  ): Promise<void> {
-    await this.articleService.addComment(id, comment, user);
-  }
-
-  @Post(':id/approve')
-  @Roles(Role.Moderator)
-  async approveComment(
-    @Param('id') id: string,
-    @CurrentUser() user: User,
-  ): Promise<void> {
-    await this.articleService.approveComment(id, user);
   }
 
   @Delete(':id')

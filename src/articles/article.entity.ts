@@ -5,8 +5,11 @@ import {
   AfterInsert,
   ManyToOne,
   BeforeInsert,
+  OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import { User } from '../users/user.entity';
+import { ArticleComment } from './comment/comment.entity';
 
 @Entity()
 export class Article {
@@ -31,14 +34,14 @@ export class Article {
   @Column({ default: 0 })
   views: number;
 
-  @Column({ nullable: true })
-  comment: string;
-
-  @Column({ default: false })
-  isCommentApproved: boolean;
-
   @ManyToOne(() => User, (user) => user.articles)
   author: User;
+
+  @OneToMany(() => ArticleComment, (comment) => comment.article, {
+    cascade: true,
+  })
+  @JoinColumn()
+  comments: ArticleComment[];
 
   @BeforeInsert()
   setCreationDate() {

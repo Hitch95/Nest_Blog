@@ -7,6 +7,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Article } from '../articles/article.entity';
+import { ArticleComment } from 'src/articles/comment/comment.entity';
 
 export enum Role {
   Admin = 'admin',
@@ -23,6 +24,9 @@ export class User {
   @Column()
   email: string;
 
+  @Column()
+  username: string;
+
   @Column({ type: 'varchar', length: 12 })
   role: Role;
 
@@ -32,6 +36,9 @@ export class User {
 
   @OneToMany(() => Article, (article) => article.author)
   articles: Article[];
+
+  @OneToMany(() => ArticleComment, (comment) => comment.author)
+  comments: ArticleComment[];
 
   @Column({ default: 0 })
   warningReceived: number;

@@ -20,11 +20,12 @@ export class RoleGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
-    console.log(requiredRoles);
+    console.log('roleguard.ts ', requiredRoles);
     if (!requiredRoles) {
       return true;
     }
-    const { user } = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest();
+    const user = request.currentUser;
     if (!user) {
       throw new ForbiddenException('Access denied: user not logged in');
     }
