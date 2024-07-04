@@ -36,6 +36,26 @@ export class CommentService {
       throw new NotFoundException('Article not found');
     }
 
+    if (user.role === 'visitor') {
+      if (user.warningReceived >= 10) {
+        throw new ForbiddenException(
+          'You are permanently banned from commenting',
+        );
+      }
+
+      if (user.warningReceived >= 2) {
+        const now = new Date();
+        const suspensionEndDate = new Date(user.suspensionStartDate);
+        suspensionEndDate.setMonth(suspensionEndDate.getMonth() + 1);
+
+        if (now < suspensionEndDate) {
+          throw new ForbiddenException(
+            'You are temporarily banned from commenting.',
+          );
+        }
+      }
+    }
+
     const comment = this.commentRepository.create({
       content,
       author: user,
@@ -52,7 +72,6 @@ export class CommentService {
   async approveComment(
     articleId: string,
     commentId: string,
-    isApproved: boolean,
     user: User,
   ): Promise<void> {
     if (user.role !== Role.Moderator) {

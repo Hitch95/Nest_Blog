@@ -53,4 +53,29 @@ export class UsersService {
     await this.userRepository.remove(user);
     return `User ${id} deleted`;
   }
+
+  async addWarning(id: string) {
+    const user = await this.findOne(id);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    user.warningReceived = (user.warningReceived || 0) + 1;
+
+    if (user.warningReceived >= 2 && !user.suspensionStartDate) {
+      user.suspensionStartDate = new Date().toISOString();
+    }
+
+    await this.userRepository.save(user);
+    return user;
+  }
+
+  async giveWarning(user: User): Promise<void> {
+    user.warningReceived += 1;
+
+    if (user.warningReceived >= 2) {
+      user.suspensionStartDate = new Date().toISOString();
+    }
+
+    await this.userRepository.save(user);
+  }
 }

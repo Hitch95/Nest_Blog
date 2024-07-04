@@ -5,6 +5,8 @@ import {
   PrimaryGeneratedColumn,
   AfterInsert,
   OneToMany,
+  BeforeInsert,
+  BeforeUpdate,
 } from 'typeorm';
 import { Article } from '../articles/article.entity';
 import { ArticleComment } from 'src/articles/comment/comment.entity';
@@ -42,6 +44,22 @@ export class User {
 
   @Column({ default: 0 })
   warningReceived: number;
+
+  @Column({ type: 'text', nullable: true })
+  suspensionStartDate: string;
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  handleDates() {
+    if (
+      this.suspensionStartDate &&
+      typeof this.suspensionStartDate === 'object'
+    ) {
+      this.suspensionStartDate = (
+        this.suspensionStartDate as Date
+      ).toISOString();
+    }
+  }
 
   @AfterInsert()
   logInsert() {

@@ -45,14 +45,8 @@ export class CommentController {
   async approveComment(
     @Param('articleId') articleId: string,
     @Param('commentId') commentId: string,
-    @Body('isApproved') isApproved: boolean,
     @CurrentUser() user: User,
   ): Promise<void> {
-    await this.commentService.approveComment(
-      articleId,
-      commentId,
-      isApproved,
-      user,
-    );
+    await this.commentService.approveComment(articleId, commentId, user);
   }
 }

@@ -107,4 +107,11 @@ export class UsersController {
     }
     return user;
   }
+
+  @Post('warning/:id')
+  @Roles(Role.Moderator)
+  @UseGuards(AuthGuard, RoleGuard)
+  async addWarning(@Param('id') id: string) {
+    return this.usersService.addWarning(id);
+  }
 }
