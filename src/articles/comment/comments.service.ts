@@ -68,14 +68,8 @@ export class CommentService {
       throw new NotFoundException('Comment not found');
     }
 
-    comment.isApproved = isApproved;
-    isApproved = true;
-    // await this.commentRepository.save(comment);
+    comment.isApproved = true;
 
-    await this.commentRepository.manager.transaction(
-      async (transactionalEntityManager) => {
-        await transactionalEntityManager.save(comment);
-      },
-    );
+    await this.commentRepository.save(comment);
   }
 }
