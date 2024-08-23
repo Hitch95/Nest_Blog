@@ -1,7 +1,4 @@
 import { Expose, Transform } from 'class-transformer';
-import { Article } from '../article.entity';
-import { User } from 'src/users/user.entity';
-import { ArticleComment } from './comment.entity';
 
 export class CommentDto {
   @Expose()

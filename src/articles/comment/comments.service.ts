@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { plainToInstance } from 'class-transformer';
 
 import { ArticleComment } from './comment.entity';
 import { Article } from '../article.entity';
@@ -22,6 +21,12 @@ export class CommentService {
     @InjectRepository(Article)
     private articleRepository: Repository<Article>,
   ) {}
+
+  async getComments(): Promise<ArticleComment[]> {
+    return this.commentRepository.find({
+      relations: ['article'],
+    });
+  }
 
   async addComment(
     articleId: string,
@@ -90,5 +95,23 @@ export class CommentService {
     comment.isApproved = true;
 
     await this.commentRepository.save(comment);
+  }
+
+  async deleteComment(articleId: string, commentId: string, user: User) {
+    if (user.role !== Role.Moderator) {
+      throw new ForbiddenException('Only a moderator can delete comments');
+    }
+
+    const comment = await this.commentRepository.findOne({
+      where: { id: commentId, article: { id: articleId } },
+      relations: ['article'],
+    });
+
+    if (!comment) {
+      throw new NotFoundException('Comment not found');
+    }
+
+    await this.commentRepository.remove(comment);
+    return 'Comment deleted';
   }
 }

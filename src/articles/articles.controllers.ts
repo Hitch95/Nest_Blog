@@ -30,6 +30,7 @@ export class ArticlesController {
 
   @Get(':id')
   @UseGuards(AuthGuard, RoleGuard)
+  @Roles(Role.Admin, Role.Moderator, Role.DataAnalyst)
   async getArticle(
     @Param('id') id: string,
     @CurrentUser() user: User,

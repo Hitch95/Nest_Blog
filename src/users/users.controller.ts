@@ -67,7 +67,7 @@ export class UsersController {
   }
 
   @Get('/:id')
-  // @Roles(Role.Admin)
+  @Roles(Role.Admin)
   @UseGuards(AuthGuard)
   async findById(@Param('id') id: string) {
     const user = this.usersService.findOne(id);
@@ -98,8 +98,7 @@ export class UsersController {
   }
 
   @Patch('/:id')
-  @Roles(Role.Admin)
-  @UseGuards(AuthGuard, RoleGuard)
+  // @UseGuards(AuthGuard, RoleGuard)
   async updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
     const user = this.usersService.update(id, body);
     if (!user) {
